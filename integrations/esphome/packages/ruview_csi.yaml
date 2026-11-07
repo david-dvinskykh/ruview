@@ -1,0 +1,66 @@
+# RuView CSI package for an ESPHome node that already runs bluetooth_proxy.
+# Requires substitution `ruview_node_id` (1..255, unique per board) and a copy
+# of integrations/esphome/components next to the device YAML files.
+substitutions:
+  ruview_target_host: 192.168.1.1
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [ruview_csi]
+
+ruview_csi:
+  id: ruview
+  target_host: ${ruview_target_host}
+  node_id: ${ruview_node_id}
+  max_rate_hz: 20
+  self_ping_hz: 10
+  min_free_heap: 40000
+
+debug:
+  update_interval: 60s
+
+switch:
+  - platform: template
+    name: RuView CSI
+    id: ruview_csi_switch
+    icon: mdi:wifi-marker
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    turn_on_action:
+      - lambda: id(ruview).set_enabled(true);
+    turn_off_action:
+      - lambda: id(ruview).set_enabled(false);
+
+sensor:
+  - platform: template
+    name: RuView CSI frames sent
+    icon: mdi:upload-network
+    lambda: return id(ruview).get_frames_sent();
+    update_interval: 60s
+    accuracy_decimals: 0
+    state_class: total_increasing
+    entity_category: diagnostic
+  - platform: template
+    name: RuView CSI frames dropped
+    icon: mdi:alert-circle-outline
+    lambda: return id(ruview).get_frames_dropped();
+    update_interval: 60s
+    accuracy_decimals: 0
+    state_class: total_increasing
+    entity_category: diagnostic
+  - platform: debug
+    free:
+      name: Heap free
+      entity_category: diagnostic
+    block:
+      name: Heap max block
+      entity_category: diagnostic
+
+binary_sensor:
+  - platform: template
+    name: RuView CSI paused (low memory)
+    lambda: return id(ruview).is_paused_low_heap();
+    entity_category: diagnostic
