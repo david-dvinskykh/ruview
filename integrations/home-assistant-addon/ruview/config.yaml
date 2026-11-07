@@ -1,5 +1,5 @@
 name: RuView Sensing Server
-version: "0.1.1"
+version: "0.1.2"
 slug: ruview
 description: >-
   RuView WiFi sensing server: receives CSI from ESPHome ESP32 nodes and
@@ -31,6 +31,7 @@ options:
   udp_port: 5005
   udp_allow: 192.168.0.0/16
   api_token: ""
+  allowed_hosts: 192.168.1.1,homeassistant.local,ruview-installation.local
   privacy_mode: true
   mqtt_prefix: homeassistant
   log_level: info
@@ -40,6 +41,7 @@ schema:
   udp_port: port
   udp_allow: str
   api_token: password?
+  allowed_hosts: str
   privacy_mode: bool
   mqtt_prefix: str
   log_level: list(trace|debug|info|warn|error)

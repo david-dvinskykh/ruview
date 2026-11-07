@@ -13,6 +13,7 @@ UDP_ALLOW="$(opt udp_allow)"
 API_TOKEN="$(opt api_token)"
 PRIVACY="$(opt privacy_mode)"
 PREFIX="$(opt mqtt_prefix)"
+ALLOWED_HOSTS="$(opt allowed_hosts)"
 export RUST_LOG="$(opt log_level)"
 
 MQTT_JSON="$(curl -fsS -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" http://supervisor/services/mqtt)"
@@ -43,6 +44,14 @@ else
     export RUVIEW_ALLOW_UNAUTHENTICATED=1
     echo "[ruview] api_token is empty: REST/WebSocket on :${HTTP_PORT} are unauthenticated on the LAN" >&2
 fi
+
+# Host-header allowlist (DNS-rebinding guard): names the UI is opened by.
+# Each entry is accepted with and without the HTTP port.
+HOSTS=""
+for h in $(echo "$ALLOWED_HOSTS" | tr ',' ' '); do
+    HOSTS="${HOSTS:+$HOSTS,}$h,$h:$HTTP_PORT"
+done
+export SENSING_ALLOWED_HOSTS="$HOSTS"
 
 export RUVIEW_DATA_DIR=/data/ruview
 export MODELS_DIR=/data/ruview/models
