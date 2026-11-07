@@ -1,5 +1,5 @@
 name: RuView Sensing Server
-version: "0.1.0"
+version: "0.1.1"
 slug: ruview
 description: >-
   RuView WiFi sensing server: receives CSI from ESPHome ESP32 nodes and
