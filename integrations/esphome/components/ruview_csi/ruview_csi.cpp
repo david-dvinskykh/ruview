@@ -138,8 +138,8 @@ void RuViewCsi::start_self_ping_() {
     return;
 
   esp_ping_config_t cfg = ESP_PING_DEFAULT_CONFIG();
-  cfg.target_addr.type = IPADDR_TYPE_V4;
-  cfg.target_addr.u_addr.ip4.addr = ip.gw.addr;
+  // Works whether lwIP is built IPv4-only (ESPHome default) or dual-stack.
+  ip_addr_set_ip4_u32(&cfg.target_addr, ip.gw.addr);
   cfg.count = ESP_PING_COUNT_INFINITE;
   cfg.interval_ms = 1000 / this->self_ping_hz_;
   cfg.timeout_ms = cfg.interval_ms;
