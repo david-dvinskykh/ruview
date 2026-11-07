@@ -12,7 +12,6 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components.esp32 import add_idf_sdkconfig_option
 from esphome.const import CONF_ID, CONF_PORT
-from esphome.core import CORE
 
 CODEOWNERS = ["@david-dvinskykh"]
 DEPENDENCIES = ["wifi", "esp32"]
@@ -26,12 +25,6 @@ CONF_ENABLED = "enabled"
 
 ruview_csi_ns = cg.esphome_ns.namespace("ruview_csi")
 RuViewCsi = ruview_csi_ns.class_("RuViewCsi", cg.Component)
-
-
-def _require_idf(config):
-    if not CORE.using_esp_idf:
-        raise cv.Invalid("ruview_csi requires the esp-idf framework")
-    return config
 
 
 CONFIG_SCHEMA = cv.All(
@@ -52,7 +45,6 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_ENABLED, default=True): cv.boolean,
         }
     ).extend(cv.COMPONENT_SCHEMA),
-    _require_idf,
 )
 
 
