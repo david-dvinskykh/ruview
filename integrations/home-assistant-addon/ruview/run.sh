@@ -14,6 +14,7 @@ API_TOKEN="$(opt api_token)"
 PRIVACY="$(opt privacy_mode)"
 PREFIX="$(opt mqtt_prefix)"
 ALLOWED_HOSTS="$(opt allowed_hosts)"
+NODE_POSITIONS="$(opt node_positions)"
 export RUST_LOG="$(opt log_level)"
 
 MQTT_JSON="$(curl -fsS -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" http://supervisor/services/mqtt)"
@@ -72,6 +73,12 @@ set -- /app/sensing-server \
     --mqtt-port "$MQTT_PORT" \
     --mqtt-username "$MQTT_USER" \
     --mqtt-prefix "$PREFIX"
+
+# Node positions in metres, "node_id:x,y,z;...". The defaults are the receiver
+# positions of the BPS floor plan (pixels / BPS scale), node_id = esp-32-N + 1.
+if [ -n "$NODE_POSITIONS" ]; then
+    set -- "$@" --node-positions "$NODE_POSITIONS"
+fi
 
 if [ "$PRIVACY" = "true" ]; then
     set -- "$@" --privacy-mode
