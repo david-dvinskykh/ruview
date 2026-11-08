@@ -74,8 +74,8 @@ set -- /app/sensing-server \
     --mqtt-username "$MQTT_USER" \
     --mqtt-prefix "$PREFIX"
 
-# Node positions in metres, "node_id:x,y,z;...". The defaults are the receiver
-# positions of the BPS floor plan (pixels / BPS scale), node_id = esp-32-N + 1.
+# Node positions in metres, "node_id:x,y,z;...", in the Dreame vacuum map frame
+# (map millimetres / 1000) shared with the RuView Home 3D card; node_id = esp-32-N + 1.
 if [ -n "$NODE_POSITIONS" ]; then
     set -- "$@" --node-positions "$NODE_POSITIONS"
 fi
