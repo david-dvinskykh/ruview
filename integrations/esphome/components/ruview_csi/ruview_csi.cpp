@@ -129,9 +129,20 @@ bool RuViewCsi::open_socket_() {
   return true;
 }
 
+// The ping session is created once and then only started and stopped.
+// Deleting a stopped esp_ping session does not reliably end its task: the task
+// waits for a start notification that never comes, so every Wi-Fi drop leaked
+// a task and a raw socket until the node rebooted.
 void RuViewCsi::start_self_ping_() {
-  if (this->ping_ != nullptr || this->self_ping_hz_ == 0)
+  if (this->self_ping_hz_ == 0)
     return;
+  if (this->ping_ != nullptr) {
+    if (!this->ping_running_) {
+      esp_ping_start(this->ping_);
+      this->ping_running_ = true;
+    }
+    return;
+  }
   esp_netif_t *sta = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
   esp_netif_ip_info_t ip{};
   if (sta == nullptr || esp_netif_get_ip_info(sta, &ip) != ESP_OK || ip.gw.addr == 0)
@@ -150,6 +161,7 @@ void RuViewCsi::start_self_ping_() {
   esp_ping_callbacks_t cbs{};
   if (esp_ping_new_session(&cfg, &cbs, &this->ping_) == ESP_OK && this->ping_ != nullptr) {
     esp_ping_start(this->ping_);
+    this->ping_running_ = true;
     ESP_LOGI(TAG, "Gateway ping started at %u Hz", (unsigned) this->self_ping_hz_);
   } else {
     this->ping_ = nullptr;
@@ -157,11 +169,10 @@ void RuViewCsi::start_self_ping_() {
 }
 
 void RuViewCsi::stop_self_ping_() {
-  if (this->ping_ == nullptr)
+  if (this->ping_ == nullptr || !this->ping_running_)
     return;
   esp_ping_stop(this->ping_);
-  esp_ping_delete_session(this->ping_);
-  this->ping_ = nullptr;
+  this->ping_running_ = false;
 }
 
 void RuViewCsi::loop() {
@@ -189,7 +200,7 @@ void RuViewCsi::loop() {
     } else {
       this->stop_self_ping_();
     }
-  } else if (want && this->ping_ == nullptr) {
+  } else if (want && !this->ping_running_) {
     this->start_self_ping_();  // gateway may not have been known yet
   }
   if (!want || !this->open_socket_())

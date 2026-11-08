@@ -64,3 +64,9 @@ binary_sensor:
     name: RuView CSI paused (low memory)
     lambda: return id(ruview).is_paused_low_heap();
     entity_category: diagnostic
+
+text_sensor:
+  - platform: debug
+    reset_reason:
+      name: Reset reason
+      entity_category: diagnostic

@@ -70,6 +70,7 @@ class RuViewCsi : public Component {
   bool csi_running_{false};
   int sock_{-1};
   esp_ping_handle_t ping_{nullptr};
+  bool ping_running_{false};
   uint32_t last_heap_check_ms_{0};
 
   // Ring buffer filled from the Wi-Fi task, drained in loop().
